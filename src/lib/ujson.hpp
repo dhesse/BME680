@@ -23,6 +23,10 @@ protected:
 public:
     JFieldBase(JFieldBase *next) : next(next){};
     virtual void format(char *buf) = 0;
+    JFieldBase* get_next() { return next; };
+    virtual ~JFieldBase() {
+        delete next;
+    };
 };
 
 template <typename T>
@@ -60,6 +64,9 @@ class JSON {
     JFieldBase* current;
     public:
     JSON() : current(NULL) {};
+    ~JSON() {
+        delete current;
+    }
     template<typename T> void push(const char* name, T value) {
         current = new JField<T>(name, value, current);
     }

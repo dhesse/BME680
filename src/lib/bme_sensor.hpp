@@ -13,3 +13,5 @@ public:
     BME680();
     const struct bme680_field_data& get_data();
 };
+
+//#define BME680_DEBUG 1

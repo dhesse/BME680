@@ -13,9 +13,10 @@ BME680 *gas_sensor;
 void setup()
 {
   gas_sensor = new BME680();
+  gas_sensor->get_data();
 }
 
-uint meas_delay_seconds = 15;
+uint meas_delay_seconds = 60*15;
 
 
 // loop() runs over and over again, as quickly as it can execute.
@@ -32,5 +33,6 @@ void loop()
   char res[80];
   json.format(res);
   Serial.println(res);
-  user_delay_ms(meas_delay_seconds * 1000);
+  Particle.publish("ambience/living_room", res, PRIVATE);
+  System.sleep(SLEEP_MODE_DEEP, meas_delay_seconds);
 };
