@@ -7,22 +7,24 @@ private:
     JFieldBase *next;
 
 protected:
-    void format_next(char *buf)
+    int format_next(char *buf)
     {
+        int res = 1;
         if (next)
         {
             buf[0] = ',';
-            next->format(buf + 1);
+            res += next->format(buf + 1);
         }
         else 
         {
             sprintf(buf, "}");
         }
+        return res;
     }
 
 public:
     JFieldBase(JFieldBase *next) : next(next){};
-    virtual void format(char *buf) = 0;
+    virtual int format(char *buf) = 0;
     JFieldBase* get_next() { return next; };
     virtual ~JFieldBase() {
         delete next;
@@ -38,25 +40,28 @@ private:
 
 public:
     JField(const char *name, T value, JFieldBase *next) : JFieldBase(next), name(name), value(value){};
-    void format(char *buf);
+    int format(char *buf);
 };
 
 template <>
-void JField<int>::format(char *buf)
+int JField<int>::format(char *buf)
 {
-    format_next(buf + sprintf(buf, "\"%s\": %i", name, value));
+    int size = sprintf(buf, "\"%s\": %i", name, value);
+    return format_next(buf + size) + size;
 }
 
 template <>
-void JField<unsigned long>::format(char *buf)
+int JField<unsigned long>::format(char *buf)
 {
-    format_next(buf + sprintf(buf, "\"%s\": %lu", name, value));
+    int size = sprintf(buf, "\"%s\": %lu", name, value);
+    return format_next(buf + size) + size;
 }
 
 template <>
-void JField<float>::format(char *buf)
+int JField<float>::format(char *buf)
 {
-    format_next(buf + sprintf(buf, "\"%s\": %.2f", name, value));
+    int size = sprintf(buf, "\"%s\": %.2f", name, value);
+    return format_next(buf + size) + size;
 }
 
 class JSON {
@@ -70,8 +75,8 @@ class JSON {
     template<typename T> void push(const char* name, T value) {
         current = new JField<T>(name, value, current);
     }
-    void format(char* buf){
+    int format(char* buf){
         buf[0] = '{';
-        current->format(buf+1);
+        return 1 + current->format(buf+1);
     }
 };
